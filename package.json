@@ -1,0 +1,24 @@
+{
+  "name": "paper-tanks",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @paper-tanks/server dev",
+    "build": "pnpm --filter @paper-tanks/client build",
+    "start": "pnpm build && NODE_ENV=production pnpm --filter @paper-tanks/server start",
+    "test": "pnpm --filter @paper-tanks/shared test && pnpm --filter @paper-tanks/server test",
+    "test:e2e": "playwright test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "typescript": "^5.9.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "vue-demi"]
+  }
+}
