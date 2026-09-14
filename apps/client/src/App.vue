@@ -5,6 +5,7 @@ import BattleBoard from "./components/BattleBoard.vue";
 import HostPanel from "./components/HostPanel.vue";
 import PlacementBoard from "./components/PlacementBoard.vue";
 import ResultScreen from "./components/ResultScreen.vue";
+import { isDisconnectVictory } from "./resultCopy.ts";
 import { useGame } from "./composables/useGame.ts";
 
 const { view, error, connected, host, nick, firing, send } = useGame();
@@ -51,7 +52,7 @@ const statusText = computed(() => {
     if (view.value.turn === view.value.you) return "Твой ход — укажи клетку на чужом листе";
     return "Сейчас ход соперника";
   }
-  if (phase.value === "ended" && view.value?.endedReason === "disconnect") {
+  if (phase.value === "ended" && view.value && isDisconnectVictory(view.value)) {
     return "Соперник вышел. Победа за тобой";
   }
   if (phase.value === "ended") return "Партия окончена";

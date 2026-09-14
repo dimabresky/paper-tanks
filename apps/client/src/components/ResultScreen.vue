@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PlayerView, Shot } from "@paper-tanks/shared";
 import ShotMap from "./ShotMap.vue";
+import { resultHeadline } from "../resultCopy.ts";
 
 defineProps<{
   view: PlayerView;
@@ -9,13 +10,6 @@ defineProps<{
 const emit = defineEmits<{
   rematch: [];
 }>();
-
-function winnerText(view: PlayerView): string {
-  if (view.endedReason === "disconnect") return "Соперник вышел. Победа за тобой";
-  if (view.winner === view.you) return "Победа";
-  if (view.winner) return "Поражение";
-  return "Конец";
-}
 
 function fmtMs(ms?: number): string {
   if (!ms) return "—";
@@ -32,8 +26,7 @@ function accuracyOf(shots: Shot[]): number {
 
 <template>
   <div class="host-card" data-testid="result">
-    <h2>{{ winnerText(view) }}</h2>
-    <p v-if="view.endedReason === 'disconnect'">Соперник вышел. Победа за тобой</p>
+    <h2>{{ resultHeadline(view) }}</h2>
     <p>
       ты {{ view.stats.accuracy }}% · соперник {{ accuracyOf(view.shotsOnYou) }}% · выстрелы
       {{ view.stats.fired }} · попадания {{ view.stats.hits }}

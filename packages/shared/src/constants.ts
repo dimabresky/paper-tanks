@@ -3,11 +3,12 @@ export const COLS = 12;
 export const ROWS = 16;
 export const COL_LETTERS = "АБВГДЕЖЗИЙКЛ";
 export const FLEET_LENGTHS = [4, 3, 3, 2, 2, 2, 1, 1] as const;
-export const PORT =
-  Number.parseInt(
-    (typeof process !== "undefined" ? process.env?.PORT : undefined) || "8787",
-    10,
-  ) || 8787;
+function envPort(): string | undefined {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  return proc?.env?.PORT;
+}
+
+export const PORT = Number.parseInt(envPort() || "8787", 10) || 8787;
 export const DISCONNECT_MS = 60_000;
 export const NICK_MAX = 24;
 export const PING_MS = 15_000;

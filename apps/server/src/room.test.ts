@@ -118,9 +118,12 @@ describe("Room", () => {
       expect(room.state.phase).toBe("ended");
       expect(room.state.winner).toBe("b");
       expect(room.state.endedReason).toBe("disconnect");
-      const view = getPlayerView(room.state, "b");
-      expect(view.endedReason).toBe("disconnect");
-      expect(view.winner).toBe("b");
+      const remaining = getPlayerView(room.state, "b");
+      expect(remaining.endedReason).toBe("disconnect");
+      expect(remaining.winner).toBe(remaining.you);
+      const dropped = getPlayerView(room.state, "a");
+      expect(dropped.endedReason).toBe("disconnect");
+      expect(dropped.winner).not.toBe(dropped.you);
     } finally {
       vi.useRealTimers();
     }
