@@ -9,7 +9,7 @@ export default defineConfig({
   webServer: {
     command: `PORT=${e2ePort} npx pnpm@10 --filter @paper-tanks/server dev`,
     url: `http://127.0.0.1:${e2ePort}/api/health`,
-    reuseExistingServer: false,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
   use: {

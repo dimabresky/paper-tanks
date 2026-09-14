@@ -1,4 +1,4 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse, type Server as HttpServer } from "node:http";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PORT } from "@paper-tanks/shared";
@@ -42,6 +42,8 @@ async function main(): Promise<void> {
     console.log(`QR / телефоны: ${info.preferredUrl}`);
     for (const url of info.joinUrls) console.log(`  ${url}`);
   });
+
+  listenForShutdown(server, wss, vite);
 }
 
 async function handleHttp(
@@ -89,6 +91,26 @@ async function handleHttp(
     res.setHeader("Content-Type", contentType(file));
     res.end(data);
   });
+}
+
+function listenForShutdown(
+  server: HttpServer,
+  wss: WebSocketServer,
+  vite: Awaited<ReturnType<typeof import("vite")["createServer"]>> | null,
+): void {
+  let stopping = false;
+  const stop = (): void => {
+    if (stopping) return;
+    stopping = true;
+    for (const client of wss.clients) client.terminate();
+    wss.close();
+    server.closeAllConnections();
+    void vite?.close();
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 800).unref();
+  };
+  process.once("SIGINT", stop);
+  process.once("SIGTERM", stop);
 }
 
 function attachSocket(ws: WebSocket): void {
