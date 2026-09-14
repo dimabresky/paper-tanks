@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { randomValidFleet } from "@paper-tanks/shared";
+import { describe, expect, it, vi } from "vitest";
+import { getPlayerView, randomValidFleet } from "@paper-tanks/shared";
 import { lanIPv4s } from "./lan.ts";
 import { Room, type WireClient } from "./room.ts";
 
@@ -48,6 +48,17 @@ describe("Room", () => {
     expect(room.state.seats.b).not.toBeNull();
   });
 
+  it("keeps one seat when the same client token reconnects before joined is handled", () => {
+    const room = new Room();
+    const first = new MockClient();
+    const retry = new MockClient();
+    const token = "ab".repeat(16);
+    room.handle(first, { type: "join", payload: { token } });
+    room.handle(retry, { type: "join", payload: { token } });
+    expect(room.state.seats.a?.token).toBe(token);
+    expect(room.state.seats.b).toBeNull();
+  });
+
   it("sends different views that do not leak opponent fleet", () => {
     const room = new Room();
     const a = new MockClient();
@@ -71,6 +82,48 @@ describe("Room", () => {
     for (const id of idsA) expect(JSON.stringify(viewB.payload)).not.toContain(`"${id}"`);
     for (const id of idsB) expect(JSON.stringify(viewA.payload)).not.toContain(`"${id}"`);
     expect(viewA.payload.opponentTanksLeft).toBe(8);
+  });
+
+  it("lets the first two browsers occupy seats and rejects a third with ROOM_FULL", () => {
+    const room = new Room();
+    const first = new MockClient();
+    const second = new MockClient();
+    const third = new MockClient();
+    room.handle(first, { type: "join", payload: { nick: "Раз" } });
+    expect(room.state.seats.a).not.toBeNull();
+    expect(room.state.seats.b).toBeNull();
+    room.handle(second, { type: "join", payload: { nick: "Два" } });
+    expect(room.state.seats.b).not.toBeNull();
+    room.handle(third, { type: "join", payload: {} });
+    expect((third.last() as { payload: { code: string } }).payload.code).toBe("ROOM_FULL");
+  });
+
+  it("awards the remaining player after 60s disconnect in battle", () => {
+    vi.useFakeTimers();
+    try {
+      const room = new Room();
+      const a = new MockClient();
+      const b = new MockClient();
+      room.handle(a, { type: "join", payload: {} });
+      room.handle(b, { type: "join", payload: {} });
+      room.handle(a, { type: "place", payload: { units: randomValidFleet().units } });
+      room.handle(b, { type: "place", payload: { units: randomValidFleet().units } });
+      room.handle(a, { type: "ready", payload: {} });
+      room.handle(b, { type: "ready", payload: {} });
+      expect(room.state.phase).toBe("battle");
+      room.drop(a);
+      vi.advanceTimersByTime(59_000);
+      expect(room.state.phase).toBe("battle");
+      vi.advanceTimersByTime(1_000);
+      expect(room.state.phase).toBe("ended");
+      expect(room.state.winner).toBe("b");
+      expect(room.state.endedReason).toBe("disconnect");
+      const view = getPlayerView(room.state, "b");
+      expect(view.endedReason).toBe("disconnect");
+      expect(view.winner).toBe("b");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("plays a full match to the end", () => {

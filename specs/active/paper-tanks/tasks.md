@@ -25,8 +25,8 @@
 
 **Purpose**: Confirm the existing three-package table; do not add a database or P2P stack
 
-- [ ] T001 Confirm pnpm layout `apps/client`, `apps/server`, `packages/shared` matches plan.md (in-memory `Room.state` only; no DB)
-- [ ] T002 Add `data-testid="status"` on the single current-step line in `apps/client/src/App.vue`
+- [X] T001 Confirm pnpm layout `apps/client`, `apps/server`, `packages/shared` matches plan.md (in-memory `Room.state` only; no DB)
+- [X] T002 Add `data-testid="status"` on the single current-step line in `apps/client/src/App.vue`
 
 ---
 
@@ -36,15 +36,15 @@
 
 **⚠️ CRITICAL**: No user story work until this phase is complete
 
-- [ ] T003 Extend `ShotResult` to `miss | hit | sunk | tree | crate` and add `Shot.cause` `fire | blast` (`fire` = player tap, `blast` = crate splash) in `packages/shared/src/types.ts`
-- [ ] T004 Add `Decoration` `{ id, kind: tree | crate, cell, burned: boolean }` (`burned` trees only; cell empty of units and other decorations) and `Seat.decorations: Decoration[]` (empty until battle; cleared on rematch) in `packages/shared/src/types.ts`
-- [ ] T005 Add `PlayerView.yourDecorations` in `packages/shared/src/types.ts` (battle/ended: own list; lobby/placement: `[]`)
-- [ ] T006 Initialize `decorations: []` in `occupySeat` / rematch reset in `packages/shared/src/match.ts` (in-memory only)
-- [ ] T007 [P] Set `cause: "fire"` on shots created by `applyFire` in `packages/shared/src/match.ts` so current miss/hit/sunk behavior is unchanged
-- [ ] T008 Return `yourDecorations` from `getPlayerView` in `packages/shared/src/view.ts` (`[]` outside battle/ended; never emit opponent decoration cells except via `shotsYouFired`)
-- [ ] T009 Compute `stats.fired` as count of own shots with `cause === "fire"`; `hits` as `hit|sunk`; `accuracy` as `fired === 0 ? 0 : round(hits / fired * 100)` in `packages/shared/src/view.ts`
-- [ ] T010 Export `Decoration` from `packages/shared/src/index.ts`
-- [ ] T011 Update `packages/shared/src/match.test.ts` and `packages/shared/src/view.test.ts` so existing place/fire/leak cases pass with `cause` and empty `decorations`
+- [X] T003 Extend `ShotResult` to `miss | hit | sunk | tree | crate` and add `Shot.cause` `fire | blast` (`fire` = player tap, `blast` = crate splash) in `packages/shared/src/types.ts`
+- [X] T004 Add `Decoration` `{ id, kind: tree | crate, cell, burned: boolean }` (`burned` trees only; cell empty of units and other decorations) and `Seat.decorations: Decoration[]` (empty until battle; cleared on rematch) in `packages/shared/src/types.ts`
+- [X] T005 Add `PlayerView.yourDecorations` in `packages/shared/src/types.ts` (battle/ended: own list; lobby/placement: `[]`)
+- [X] T006 Initialize `decorations: []` in `occupySeat` / rematch reset in `packages/shared/src/match.ts` (in-memory only)
+- [X] T007 [P] Set `cause: "fire"` on shots created by `applyFire` in `packages/shared/src/match.ts` so current miss/hit/sunk behavior is unchanged
+- [X] T008 Return `yourDecorations` from `getPlayerView` in `packages/shared/src/view.ts` (`[]` outside battle/ended; never emit opponent decoration cells except via `shotsYouFired`)
+- [X] T009 Compute `stats.fired` as count of own shots with `cause === "fire"`; `hits` as `hit|sunk`; `accuracy` as `fired === 0 ? 0 : round(hits / fired * 100)` in `packages/shared/src/view.ts`
+- [X] T010 Export `Decoration` from `packages/shared/src/index.ts`
+- [X] T011 Update `packages/shared/src/match.test.ts` and `packages/shared/src/view.test.ts` so existing place/fire/leak cases pass with `cause` and empty `decorations`
 
 **Checkpoint**: Two players still join, place, fire, and win; `/api/host` still has no fleet JSON
 
@@ -58,15 +58,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Assert `GET /api/host` body contains no fleet or decoration JSON in `e2e/match.spec.ts`
+- [X] T012 [P] [US1] Assert `GET /api/host` body contains no fleet or decoration JSON in `e2e/match.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Render `HostPanel` only while `seatsTaken < 2` in `apps/client/src/App.vue` (`data-testid="host-panel"`)
-- [ ] T014 [US1] Lobby waiting copy on `data-testid="status"` in `apps/client/src/App.vue` (one action: second player scans QR)
-- [ ] T015 [US1] Keep preferred QR URL non-`169.254.0.0/16` in `apps/server/src/lan.ts`
-- [ ] T044 [US1] Regression: disconnect in battle longer than 60 s without reconnect → remaining player wins with «Соперник вышел. Победа за тобой» in `apps/server/src/room.test.ts` (FR-020, SC-010; fake timers)
-- [ ] T045 [US1] Regression: a third browser on the host URL occupies a free seat until two are taken; third is `ROOM_FULL` in `apps/server/src/room.test.ts` (FR-002, FR-005)
+- [X] T013 [US1] Render `HostPanel` only while `seatsTaken < 2` in `apps/client/src/App.vue` (`data-testid="host-panel"`)
+- [X] T014 [US1] Lobby waiting copy on `data-testid="status"` in `apps/client/src/App.vue` (one action: second player scans QR)
+- [X] T015 [US1] Keep preferred QR URL non-`169.254.0.0/16` in `apps/server/src/lan.ts`
+- [X] T044 [US1] Regression: disconnect in battle longer than 60 s without reconnect → remaining player wins with «Соперник вышел. Победа за тобой» in `apps/server/src/room.test.ts` (FR-020, SC-010; fake timers)
+- [X] T045 [US1] Regression: a third browser on the host URL occupies a free seat until two are taken; third is `ROOM_FULL` in `apps/server/src/room.test.ts` (FR-002, FR-005)
 
 **Checkpoint**: Table join UX matches FR-016 host-card rule; fog of war unchanged
 
@@ -80,9 +80,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Redraw `apps/client/src/components/TankInk.vue` so hull, turret, and barrel stay inside the viewBox of occupied cells (no `overflow: visible`)
-- [ ] T017 [US2] Set `overflow: hidden` on `.tank-origin` in `apps/client/src/components/PlacementBoard.vue`, `apps/client/src/components/BattleBoard.vue`, and `apps/client/src/styles.css`
-- [ ] T018 [US2] Keep `validateFleet` constraints (orthogonal contiguous, in bounds, composition `[4,3,3,2,2,2,1,1]`, no Moore touch) in `packages/shared/src/fleet.ts` and `packages/shared/src/fleet.test.ts`
+- [X] T016 [P] [US2] Redraw `apps/client/src/components/TankInk.vue` so hull, turret, and barrel stay inside the viewBox of occupied cells (no `overflow: visible`)
+- [X] T017 [US2] Set `overflow: hidden` on `.tank-origin` in `apps/client/src/components/PlacementBoard.vue`, `apps/client/src/components/BattleBoard.vue`, and `apps/client/src/styles.css`
+- [X] T018 [US2] Keep `validateFleet` constraints (orthogonal contiguous, in bounds, composition `[4,3,3,2,2,2,1,1]`, no Moore touch) in `packages/shared/src/fleet.ts` and `packages/shared/src/fleet.test.ts`
 
 **Checkpoint**: Placement still rejects overlap; random fleet no longer visually overflows the grid
 
@@ -96,12 +96,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T019 [P] [US3] Keep two-context match completion in `e2e/match.spec.ts` after Shot type changes
+- [X] T019 [P] [US3] Keep two-context match completion in `e2e/match.spec.ts` after Shot type changes
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Document and enforce `CELL_TAKEN` for any prior attacker shot on that cell (including future `blast`) in `packages/shared/src/match.ts`
-- [ ] T021 [US3] Map `lastShot` `miss`/`hit`/`sunk` to «мимо»/«ранен»/«убит» in `apps/client/src/components/BattleBoard.vue`
+- [X] T020 [US3] Document and enforce `CELL_TAKEN` for any prior attacker shot on that cell (including future `blast`) in `packages/shared/src/match.ts`
+- [X] T021 [US3] Map `lastShot` `miss`/`hit`/`sunk` to «мимо»/«ранен»/«убит» in `apps/client/src/components/BattleBoard.vue`
 
 **Checkpoint**: Core battle loop still works; scenery not required yet
 
@@ -115,10 +115,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T022 [US4] Remove lined+squared `repeating-linear-gradient` from covering `.board` in `apps/client/src/styles.css`; `.sheet` paper wash only; `.cell` square borders only
-- [ ] T023 [US4] Add `--cell-size` (default ≥ 36px) and `.board-scroller { overflow: auto }` in `apps/client/src/styles.css` and `apps/client/src/components/GridBoard.vue`
-- [ ] T024 [US4] Zoom controls (+/− and pinch) adjusting `--cell-size` between fit-sheet and ~2× default in `apps/client/src/components/GridBoard.vue` without CSS `transform` screenshot scaling
-- [ ] T046 [US4] After changing `--cell-size`, a click on `data-testid="cell"` still matches that button’s `data-x`/`data-y` in `e2e/match.spec.ts` (SC-004)
+- [X] T022 [US4] Remove lined+squared `repeating-linear-gradient` from covering `.board` in `apps/client/src/styles.css`; `.sheet` paper wash only; `.cell` square borders only
+- [X] T023 [US4] Add `--cell-size` (default ≥ 36px) and `.board-scroller { overflow: auto }` in `apps/client/src/styles.css` and `apps/client/src/components/GridBoard.vue`
+- [X] T024 [US4] Zoom controls (+/− and pinch) adjusting `--cell-size` between fit-sheet and ~2× default in `apps/client/src/components/GridBoard.vue` without CSS `transform` screenshot scaling
+- [X] T046 [US4] After changing `--cell-size`, a click on `data-testid="cell"` still matches that button’s `data-x`/`data-y` in `e2e/match.spec.ts` (SC-004)
 
 **Checkpoint**: Field reads as notebook squares and is finger-targetable
 
@@ -132,10 +132,10 @@
 
 ### Implementation for User Story 5
 
-- [ ] T025 [P] [US5] Rename controls to «Повернуть», «Чужой лист», «Мой лист» in `apps/client/src/components/PlacementBoard.vue` and `apps/client/src/components/BattleBoard.vue`
-- [ ] T026 [US5] Drive `data-testid="status"` from phase+turn in `apps/client/src/App.vue` (placement «Расставь танки и нажми Готов»; battle «Твой ход — укажи клетку на чужом листе» / «Сейчас ход соперника»)
-- [ ] T027 [US5] Keep firewall/AP-isolation copy only on the waiting `HostPanel` in `apps/client/src/components/HostPanel.vue`
-- [ ] T047 [US5] If a fire reply takes more than 3 s, `data-testid="status"` shows wait copy in `apps/client/src/App.vue` (plan performance; `firing` already exists in `useGame.ts`)
+- [X] T025 [P] [US5] Rename controls to «Повернуть», «Чужой лист», «Мой лист» in `apps/client/src/components/PlacementBoard.vue` and `apps/client/src/components/BattleBoard.vue`
+- [X] T026 [US5] Drive `data-testid="status"` from phase+turn in `apps/client/src/App.vue` (placement «Расставь танки и нажми Готов»; battle «Твой ход — укажи клетку на чужом листе» / «Сейчас ход соперника»)
+- [X] T027 [US5] Keep firewall/AP-isolation copy only on the waiting `HostPanel` in `apps/client/src/components/HostPanel.vue`
+- [X] T047 [US5] If a fire reply takes more than 3 s, `data-testid="status"` shows wait copy in `apps/client/src/App.vue` (plan performance; `firing` already exists in `useGame.ts`)
 
 **Checkpoint**: UI reads as a table game, not a debug panel
 
@@ -149,9 +149,9 @@
 
 ### Implementation for User Story 7
 
-- [ ] T028 [US7] Stats strip: turn, `ты N — соперник M`, fired, accuracy%, last result in `apps/client/src/components/BattleBoard.vue` (`data-testid="stats"`)
-- [ ] T029 [US7] Result screen winner, duration, both accuracies, shot map in `apps/client/src/components/ResultScreen.vue`
-- [ ] T030 [US7] «Ещё партию» via existing `rematch` in `apps/client/src/components/ResultScreen.vue`; confirm `voteRematch` clears fleets and `decorations` in `packages/shared/src/match.ts`
+- [X] T028 [US7] Stats strip: turn, `ты N — соперник M`, fired, accuracy%, last result in `apps/client/src/components/BattleBoard.vue` (`data-testid="stats"`)
+- [X] T029 [US7] Result screen winner, duration, both accuracies, shot map in `apps/client/src/components/ResultScreen.vue`
+- [X] T030 [US7] «Ещё партию» via existing `rematch` in `apps/client/src/components/ResultScreen.vue`; confirm `voteRematch` clears fleets and `decorations` in `packages/shared/src/match.ts`
 
 **Checkpoint**: Match accounting works; lastShot can later show ёлка/ящик when US6 lands
 
@@ -167,19 +167,19 @@
 
 > Write these FIRST and ensure they FAIL before implementation
 
-- [ ] T031 [P] [US6] Failing tests: `placeDecorations` yields 5 trees + 2 crates, never on unit cells, may be Moore-adjacent to tanks, no decoration overlap in `packages/shared/src/decorations.test.ts`
-- [ ] T032 [P] [US6] Failing tests: `applyFire` on tree → `result: "tree"`, turn passes; crate → 2–4 in-bounds unopened Moore `blast` shots; nested crate reveals without re-blast; turn kept iff any `hit`/`sunk` in `packages/shared/src/match.test.ts`
-- [ ] T033 [P] [US6] Failing leak test: opponent decoration `${x}:${y}` absent from `getPlayerView` until that cell is in `shotsYouFired` in `packages/shared/src/view.test.ts`
+- [X] T031 [P] [US6] Failing tests: `placeDecorations` yields 5 trees + 2 crates, never on unit cells, may be Moore-adjacent to tanks, no decoration overlap in `packages/shared/src/decorations.test.ts`
+- [X] T032 [P] [US6] Failing tests: `applyFire` on tree → `result: "tree"`, turn passes; crate → 2–4 in-bounds unopened Moore `blast` shots; nested crate reveals without re-blast; turn kept iff any `hit`/`sunk` in `packages/shared/src/match.test.ts`
+- [X] T033 [P] [US6] Failing leak test: opponent decoration `${x}:${y}` absent from `getPlayerView` until that cell is in `shotsYouFired` in `packages/shared/src/view.test.ts`
 
 ### Implementation for User Story 6
 
-- [ ] T034 [US6] Implement `placeDecorations(fleet, rng)` (7 cells, retry on collision, never on unit cells) in `packages/shared/src/decorations.ts` and export it from `packages/shared/src/index.ts`
-- [ ] T035 [US6] Call `placeDecorations` for both seats on placement→battle in `setReady` in `packages/shared/src/match.ts`; `burned: false`
-- [ ] T036 [US6] Extend `applyFire` in `packages/shared/src/match.ts`: empty→miss; tree→`burned` + `tree` + pass turn; crate→2–4 `blast`; blast crate→`crate` no nested blast; `CELL_TAKEN` if attacker already opened the cell
-- [ ] T037 [US6] Project `yourDecorations` and burned trees in `packages/shared/src/view.ts`; strip `sunkUnitId` from public shots if unused by UI
-- [ ] T038 [P] [US6] Add static ink `TreeInk.vue`, `CrateInk.vue`, `BurningTreeInk.vue` (no fire animation) in `apps/client/src/components/`
-- [ ] T039 [US6] Draw own decorations and revealed enemy tree/crate/blast marks in `apps/client/src/components/BattleBoard.vue`
-- [ ] T040 [US6] Map `lastShot` `tree`/`crate` to «ёлка»/«ящик» in `apps/client/src/components/BattleBoard.vue`
+- [X] T034 [US6] Implement `placeDecorations(fleet, rng)` (7 cells, retry on collision, never on unit cells) in `packages/shared/src/decorations.ts` and export it from `packages/shared/src/index.ts`
+- [X] T035 [US6] Call `placeDecorations` for both seats on placement→battle in `setReady` in `packages/shared/src/match.ts`; `burned: false`
+- [X] T036 [US6] Extend `applyFire` in `packages/shared/src/match.ts`: empty→miss; tree→`burned` + `tree` + pass turn; crate→2–4 `blast`; blast crate→`crate` no nested blast; `CELL_TAKEN` if attacker already opened the cell
+- [X] T037 [US6] Project `yourDecorations` and burned trees in `packages/shared/src/view.ts`; strip `sunkUnitId` from public shots if unused by UI
+- [X] T038 [P] [US6] Add static ink `TreeInk.vue`, `CrateInk.vue`, `BurningTreeInk.vue` (no fire animation) in `apps/client/src/components/`
+- [X] T039 [US6] Draw own decorations and revealed enemy tree/crate/blast marks in `apps/client/src/components/BattleBoard.vue`
+- [X] T040 [US6] Map `lastShot` `tree`/`crate` to «ёлка»/«ящик» in `apps/client/src/components/BattleBoard.vue`
 
 **Checkpoint**: Scenery is server-authored and hidden from the opponent until shot
 
@@ -189,9 +189,9 @@
 
 **Purpose**: Quickstart gate and docs; no P2P, no persistence
 
-- [ ] T041 [P] Align `README.md` with squared grid, zoom, trees/crates, and PC-as-table (no phone P2P)
-- [ ] T042 [P] `pnpm typecheck` after `PlayerView` / `Shot` changes
-- [ ] T043 Run `pnpm test` and `pnpm test:e2e` per `specs/active/paper-tanks/quickstart.md` (includes SC-008: match still playable after host WAN is down once both have joined — manual note in README via T041)
+- [X] T041 [P] Align `README.md` with squared grid, zoom, trees/crates, and PC-as-table (no phone P2P)
+- [X] T042 [P] `pnpm typecheck` after `PlayerView` / `Shot` changes
+- [X] T043 Run `pnpm test` and `pnpm test:e2e` per `specs/active/paper-tanks/quickstart.md` (includes SC-008: match still playable after host WAN is down once both have joined — manual note in README via T041)
 
 Analyze follow-ups (IDs continue after T043 so existing IDs stay stable): T044–T045 in US1, T046 in US4, T047 in US5.
 

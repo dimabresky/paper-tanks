@@ -12,8 +12,7 @@ export function lanIPv4s(): string[] {
   const found: { address: string; name: string }[] = [];
   for (const [name, addrs] of Object.entries(networkInterfaces())) {
     for (const addr of addrs ?? []) {
-      const family = addr.family === "IPv4" || addr.family === 4;
-      if (!family || addr.internal) continue;
+      if (addr.family !== "IPv4" || addr.internal) continue;
       if (LINK_LOCAL.test(addr.address)) continue;
       found.push({ address: addr.address, name });
     }

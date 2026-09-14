@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import type { PlayerView, Shot, Unit } from "@paper-tanks/shared";
+import type { Decoration, PlayerView, Shot, Unit } from "@paper-tanks/shared";
 import { computed, ref } from "vue";
+import BurningTreeInk from "./BurningTreeInk.vue";
+import CrateInk from "./CrateInk.vue";
 import GridBoard from "./GridBoard.vue";
 import TankInk from "./TankInk.vue";
+import TreeInk from "./TreeInk.vue";
 
 const props = defineProps<{
   view: PlayerView;
@@ -33,6 +36,10 @@ function mark(shots: Shot[], x: number, y: number): Shot["result"] | undefined {
   return shots.find((s) => s.cell.x === x && s.cell.y === y)?.result;
 }
 
+function decoAt(list: Decoration[], x: number, y: number): Decoration | undefined {
+  return list.find((d) => d.cell.x === x && d.cell.y === y);
+}
+
 function onEnemy(x: number, y: number): void {
   if (!myTurn.value || props.firing) return;
   if (mark(props.view.shotsYouFired, x, y)) return;
@@ -44,28 +51,30 @@ const lastText = computed(() => {
   if (!s) return "";
   if (s.result === "miss") return "мимо";
   if (s.result === "hit") return "ранен";
-  return "убит";
+  if (s.result === "sunk") return "убит";
+  if (s.result === "tree") return "ёлка";
+  if (s.result === "crate") return "ящик";
+  return "";
 });
 </script>
 
 <template>
   <div class="stats" data-testid="stats">
     <span>{{ myTurn ? "твой ход" : "ход соперника" }}</span>
-    <span>танки {{ view.yourTanksLeft }} — {{ view.opponentTanksLeft }}</span>
+    <span>ты {{ view.yourTanksLeft }} — соперник {{ view.opponentTanksLeft }}</span>
     <span>выстрелы {{ view.stats.fired }} ({{ view.stats.accuracy }}%)</span>
     <span v-if="lastText">последний: {{ lastText }}</span>
   </div>
   <div class="tabs">
-    <button type="button" :class="{ primary: tab === 'enemy' }" @click="tab = 'enemy'">Враг</button>
-    <button type="button" :class="{ primary: tab === 'mine' }" @click="tab = 'mine'">Мои</button>
+    <button type="button" :class="{ primary: tab === 'enemy' }" @click="tab = 'enemy'">Чужой лист</button>
+    <button type="button" :class="{ primary: tab === 'mine' }" @click="tab = 'mine'">Мой лист</button>
   </div>
   <GridBoard v-if="tab === 'enemy'" @cell="onEnemy">
     <template #default="{ x, y }">
-      <span v-if="mark(view.shotsYouFired, x, y) === 'miss'" class="dot" />
-      <span
-        v-else-if="mark(view.shotsYouFired, x, y)"
-        class="cross"
-      />
+      <BurningTreeInk v-if="mark(view.shotsYouFired, x, y) === 'tree'" />
+      <CrateInk v-else-if="mark(view.shotsYouFired, x, y) === 'crate'" />
+      <span v-else-if="mark(view.shotsYouFired, x, y) === 'miss'" class="dot" />
+      <span v-else-if="mark(view.shotsYouFired, x, y)" class="cross" />
     </template>
   </GridBoard>
   <GridBoard v-else>
@@ -79,11 +88,14 @@ const lastText = computed(() => {
       >
         <TankInk :length="unit.length" :horizontal="isHorizontal(unit)" />
       </div>
+      <BurningTreeInk v-if="decoAt(view.yourDecorations, x, y)?.kind === 'tree' && decoAt(view.yourDecorations, x, y)?.burned" />
+      <TreeInk v-else-if="decoAt(view.yourDecorations, x, y)?.kind === 'tree'" />
+      <CrateInk v-else-if="decoAt(view.yourDecorations, x, y)?.kind === 'crate'" />
       <span v-if="mark(view.shotsOnYou, x, y) === 'miss'" class="dot" />
+      <span v-else-if="mark(view.shotsOnYou, x, y) === 'tree' || mark(view.shotsOnYou, x, y) === 'crate'" />
       <span v-else-if="mark(view.shotsOnYou, x, y)" class="cross" />
     </template>
   </GridBoard>
-  <p class="status" v-if="firing">ждём ответ…</p>
 </template>
 
 <style scoped>
@@ -93,5 +105,6 @@ const lastText = computed(() => {
   top: 0;
   z-index: 1;
   pointer-events: none;
+  overflow: hidden;
 }
 </style>

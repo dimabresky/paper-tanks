@@ -8,22 +8,21 @@ defineProps<{
 <template>
   <svg
     class="tank-svg"
-    :viewBox="horizontal ? '0 0 120 40' : '0 0 40 120'"
+    :viewBox="horizontal ? '0 0 100 32' : '0 0 32 100'"
     preserveAspectRatio="none"
     aria-hidden="true"
   >
     <g
       fill="none"
       stroke="#1c4c9c"
-      stroke-width="2.2"
+      stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      :transform="horizontal ? '' : 'rotate(90 20 20) translate(0 -80)'"
+      :transform="horizontal ? '' : 'rotate(90 16 16) translate(0 -68)'"
     >
-      <path d="M8 14 q 6 -7 22 -6 q 28 1 50 3 q 18 2 28 8 q -2 10 -8 14 q -30 4 -70 2 q -14 -1 -20 -8 q 2 -8 0 -13 z" />
-      <path d="M40 10 q 8 -8 22 -4 q 6 8 -2 12 q -12 2 -20 0 q -4 -2 0 -8 z" />
-      <path d="M62 8 h 28 q 4 2 5 6" />
-      <path d="M18 28 q 12 4 40 3 q 20 0 32 -4" opacity="0.7" />
+      <path d="M4 10 q 8 -6 18 -6 h 56 q 12 1 18 8 v 8 q -6 8 -18 8 h -56 q -12 0 -18 -8 z" />
+      <path d="M38 6 h 22 v 8 h -22 z" />
+      <path d="M60 10 h 36" />
     </g>
   </svg>
 </template>
@@ -32,6 +31,6 @@ defineProps<{
 .tank-svg {
   width: 100%;
   height: 100%;
-  overflow: visible;
+  overflow: hidden;
 }
 </style>

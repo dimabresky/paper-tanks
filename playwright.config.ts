@@ -1,17 +1,19 @@
 import { defineConfig } from "@playwright/test";
 
+const e2ePort = 8799;
+
 export default defineConfig({
   testDir: "./e2e",
   timeout: 120_000,
   fullyParallel: false,
   webServer: {
-    command: "pnpm dev",
-    url: "http://127.0.0.1:8787/api/health",
-    reuseExistingServer: !process.env.CI,
+    command: `PORT=${e2ePort} npx pnpm@10 --filter @paper-tanks/server dev`,
+    url: `http://127.0.0.1:${e2ePort}/api/health`,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
   use: {
-    baseURL: "http://127.0.0.1:8787",
+    baseURL: `http://127.0.0.1:${e2ePort}`,
     channel: "chrome",
   },
 });

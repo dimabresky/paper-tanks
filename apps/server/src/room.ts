@@ -133,7 +133,8 @@ export class Room {
       });
       return;
     }
-    const newToken = randomBytes(16).toString("hex");
+    const newToken =
+      token && /^[a-f0-9]{32}$/i.test(token) ? token : randomBytes(16).toString("hex");
     occupySeat(this.state, free, nick ?? "", newToken);
     this.tokenToSeat.set(newToken, free);
     this.attach(free, client);

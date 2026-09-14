@@ -1,6 +1,8 @@
 export type SeatId = "a" | "b";
 export type Phase = "lobby" | "placement" | "battle" | "ended";
-export type ShotResult = "miss" | "hit" | "sunk";
+export type ShotResult = "miss" | "hit" | "sunk" | "tree" | "crate";
+export type ShotCause = "fire" | "blast";
+export type DecorationKind = "tree" | "crate";
 
 export interface Cell {
   x: number;
@@ -17,10 +19,19 @@ export interface Fleet {
   units: Unit[];
 }
 
+export interface Decoration {
+  id: string;
+  kind: DecorationKind;
+  cell: Cell;
+  /** Trees only; true after that cell is opened as a tree. */
+  burned: boolean;
+}
+
 export interface Shot {
   by: SeatId;
   cell: Cell;
   result: ShotResult;
+  cause: ShotCause;
   sunkUnitId?: string;
   at: number;
 }
@@ -31,6 +42,7 @@ export interface Seat {
   token: string;
   ready: boolean;
   fleet: Fleet | null;
+  decorations: Decoration[];
   connected: boolean;
   lastSeen: number;
 }
@@ -53,6 +65,7 @@ export interface PlayerView {
   opponentNick: string | null;
   phase: Phase;
   yourFleet: Fleet | null;
+  yourDecorations: Decoration[];
   yourReady: boolean;
   opponentReady: boolean;
   opponentTanksLeft: number;

@@ -14,14 +14,15 @@ export function getPlayerView(state: MatchState, seat: SeatId): PlayerView {
     throw new Error("seat empty");
   }
   const opp = state.seats[otherSeat(seat)];
-  const shotsYouFired = state.shots
-    .filter((s) => s.by === seat)
-    .map(publicShot);
+  const shotsYouFired = state.shots.filter((s) => s.by === seat).map(publicShot);
   const shotsOnYou = state.shots.filter((s) => s.by !== seat).map(publicShot);
-  const hits = shotsYouFired.filter((s) => s.result !== "miss").length;
-  const fired = shotsYouFired.length;
+  const fired = shotsYouFired.filter((s) => s.cause === "fire").length;
+  const hits = shotsYouFired.filter((s) => s.result === "hit" || s.result === "sunk").length;
   const yourHitsReceived = shotsOn(state, seat);
   const oppHitsReceived = opp ? shotsOn(state, opp.id) : [];
+  const showDecorations = state.phase === "battle" || state.phase === "ended";
+  const lastFire = [...shotsYouFired].reverse().find((s) => s.cause === "fire");
+  const lastShot = lastFire ?? (state.shots.length ? publicShot(state.shots[state.shots.length - 1]!) : null);
 
   return {
     you: seat,
@@ -29,6 +30,7 @@ export function getPlayerView(state: MatchState, seat: SeatId): PlayerView {
     opponentNick: opp?.nick ?? null,
     phase: state.phase,
     yourFleet: you.fleet,
+    yourDecorations: showDecorations ? you.decorations.map((d) => ({ ...d, cell: { ...d.cell } })) : [],
     yourReady: you.ready,
     opponentReady: opp?.ready ?? false,
     yourTanksLeft: tanksLeft(you.fleet, yourHitsReceived),
@@ -36,7 +38,7 @@ export function getPlayerView(state: MatchState, seat: SeatId): PlayerView {
     turn: state.turn,
     shotsYouFired,
     shotsOnYou,
-    lastShot: state.shots.length ? publicShot(state.shots[state.shots.length - 1]!) : null,
+    lastShot,
     stats: {
       fired,
       hits,
