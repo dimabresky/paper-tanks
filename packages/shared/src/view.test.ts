@@ -37,10 +37,13 @@ describe("getPlayerView", () => {
     setReady(state, "a");
     setReady(state, "b");
     state.turn = "a";
+    state.seats.a!.decorations = [];
+    state.seats.b!.decorations = [];
 
     const viewA = getPlayerView(state, "a");
     const json = JSON.stringify(viewA);
     expect(json).not.toContain("secret-b-");
+    expect(viewA.yourDecorations).toEqual([]);
     expect(viewA.yourFleet?.units.some((u) => u.id.startsWith("a-"))).toBe(true);
     expect(viewA.phase).toBe("battle");
     expect(viewA.turn).toBe("a");
@@ -57,5 +60,33 @@ describe("getPlayerView", () => {
     applyFire(state, "a", { x: 0, y: 0 });
     const partial = JSON.stringify(getPlayerView(state, "a"));
     expect(partial).not.toContain("secret-b-");
+  });
+
+  it("hides opponent decoration cells until they appear in shotsYouFired", () => {
+    const state = createMatch();
+    occupySeat(state, "a", "Аня", "ta");
+    occupySeat(state, "b", "Боря", "tb");
+    placeFleet(state, "a", stackedA);
+    placeFleet(state, "b", stacked);
+    setReady(state, "a");
+    setReady(state, "b");
+    state.turn = "a";
+    state.seats.a!.decorations = [];
+    state.seats.b!.decorations = [
+      { id: "hidden-tree", kind: "tree", cell: { x: 9, y: 9 }, burned: false },
+    ];
+
+    const before = JSON.stringify(getPlayerView(state, "a"));
+    expect(before).not.toContain("hidden-tree");
+    expect(before).not.toContain("9:9");
+    expect(before).not.toMatch(/"x":9,"y":9/);
+
+    applyFire(state, "a", { x: 9, y: 9 });
+    const after = getPlayerView(state, "a");
+    const afterJson = JSON.stringify(after);
+    expect(afterJson).not.toContain("hidden-tree");
+    expect(
+      after.shotsYouFired.some((s) => s.cell.x === 9 && s.cell.y === 9 && s.result === "tree"),
+    ).toBe(true);
   });
 });

@@ -98,9 +98,7 @@ function clear(): void {
     >
       {{ len }}×{{ remaining.filter((l) => l === len).length }}
     </button>
-    <button type="button" :disabled="ready" @click="horizontal = !horizontal">
-      {{ horizontal ? "гориз." : "вертик." }}
-    </button>
+    <button type="button" :disabled="ready" @click="horizontal = !horizontal">Повернуть</button>
   </div>
   <GridBoard :highlight="ghost" @cell="onCell">
     <template #default="{ x, y }">
@@ -130,7 +128,7 @@ function clear(): void {
       Готов
     </button>
   </div>
-  <p class="status">
+  <p class="hint">
     {{ ready ? "Ждём соперника…" : opponentReady ? "Соперник готов" : "" }}
   </p>
 </template>
@@ -142,5 +140,6 @@ function clear(): void {
   top: 0;
   z-index: 1;
   pointer-events: none;
+  overflow: hidden;
 }
 </style>

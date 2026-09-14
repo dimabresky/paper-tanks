@@ -1,4 +1,20 @@
-export type { Cell, ClientMessage, ErrorCode, Fleet, MatchState, PlayerView, Seat, SeatId, ServerMessage, Shot, ShotResult, Unit } from "./types.ts";
+export type {
+  Cell,
+  ClientMessage,
+  Decoration,
+  DecorationKind,
+  ErrorCode,
+  Fleet,
+  MatchState,
+  PlayerView,
+  Seat,
+  SeatId,
+  ServerMessage,
+  Shot,
+  ShotCause,
+  ShotResult,
+  Unit,
+} from "./types.ts";
 export { GameError } from "./types.ts";
 export {
   COLS,
@@ -27,6 +43,7 @@ export {
   unitsTouchOrOverlap,
   validateFleet,
 } from "./fleet.ts";
+export { mooreNeighbors, placeDecorations } from "./decorations.ts";
 export {
   applyFire,
   createMatch,

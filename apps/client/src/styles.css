@@ -2,11 +2,12 @@
 
 :root {
   --paper: #f4e4b8;
-  --line: rgba(40, 90, 160, 0.28);
+  --line: rgba(40, 90, 160, 0.35);
   --ink: #1c4c9c;
   --ink-soft: #2a5fad;
   --hit: #8b1e1e;
   --text: #1a2744;
+  --cell-size: 36px;
 }
 
 * {
@@ -49,23 +50,7 @@ button.primary {
 
 .sheet {
   min-height: 100dvh;
-  background:
-    linear-gradient(rgba(255, 250, 230, 0.18), rgba(180, 140, 60, 0.1)),
-    repeating-linear-gradient(
-      to bottom,
-      var(--paper) 0,
-      var(--paper) 27px,
-      var(--line) 27px,
-      var(--line) 28px
-    ),
-    repeating-linear-gradient(
-      to right,
-      transparent 0,
-      transparent 27px,
-      var(--line) 27px,
-      var(--line) 28px
-    );
-  background-color: var(--paper);
+  background: linear-gradient(rgba(255, 250, 230, 0.22), rgba(180, 140, 60, 0.08)), var(--paper);
   padding: 0.6rem 0.6rem 1.4rem;
 }
 
@@ -104,6 +89,10 @@ button.primary {
   margin: 0.5rem 0;
 }
 
+.zoom-row {
+  margin-bottom: 0.25rem;
+}
+
 .host-card {
   max-width: 22rem;
   margin: 0.4rem auto 0.8rem;
@@ -132,14 +121,22 @@ button.primary {
 }
 
 .grid-wrap {
-  width: min(100%, 420px);
+  width: 100%;
   margin: 0 auto;
+}
+
+.board-scroller {
+  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .board {
   display: grid;
-  grid-template-columns: 1.4rem repeat(12, 1fr);
-  width: 100%;
+  grid-template-columns: 1.4rem repeat(12, var(--cell-size));
+  width: max-content;
+  background: rgba(255, 252, 240, 0.35);
 }
 
 .board .hlabel,
@@ -152,12 +149,14 @@ button.primary {
 }
 
 .cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
   aspect-ratio: 1;
-  border: 0.5px solid var(--line);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.2);
   padding: 0;
   position: relative;
-  min-width: 0;
+  min-width: var(--cell-size);
 }
 
 .cell.preview {
@@ -238,8 +237,20 @@ button.primary {
   opacity: 0.7;
 }
 
-.tank-layer {
+.result-map i.tree {
+  background: #2f6b3a;
+  opacity: 0.45;
+}
+
+.result-map i.crate {
+  background: #8a5a2b;
+  opacity: 0.5;
+}
+
+.tank-layer,
+.tank-origin {
   pointer-events: none;
   position: absolute;
   inset: 0;
+  overflow: hidden;
 }

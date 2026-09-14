@@ -27,12 +27,14 @@ export function useGame() {
   }
 
   function connect(): void {
+    if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
+      return;
+    }
     const proto = location.protocol === "https:" ? "wss" : "ws";
     ws = new WebSocket(`${proto}://${location.host}/ws`);
     ws.addEventListener("open", () => {
       connected.value = true;
-      const token = sessionStorage.getItem(TOKEN_KEY) ?? undefined;
-      send({ type: "join", payload: { nick: nick.value || undefined, token } });
+      send({ type: "join", payload: { nick: nick.value || undefined, token: clientToken() } });
       ping = setInterval(() => send({ type: "ping" }), PING_MS);
     });
     ws.addEventListener("message", (ev) => {
@@ -71,4 +73,14 @@ export function useGame() {
   });
 
   return { view, seat, error, connected, host, nick, firing, send };
+}
+
+function clientToken(): string {
+  const existing = sessionStorage.getItem(TOKEN_KEY);
+  if (existing && /^[a-f0-9]{32}$/i.test(existing)) return existing;
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const token = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  sessionStorage.setItem(TOKEN_KEY, token);
+  return token;
 }

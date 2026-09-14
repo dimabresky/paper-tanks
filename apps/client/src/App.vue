@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { validateFleet, type Unit } from "@paper-tanks/shared";
-import { computed, ref, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 import BattleBoard from "./components/BattleBoard.vue";
 import HostPanel from "./components/HostPanel.vue";
 import PlacementBoard from "./components/PlacementBoard.vue";
 import ResultScreen from "./components/ResultScreen.vue";
+import { isDisconnectVictory } from "./resultCopy.ts";
 import { useGame } from "./composables/useGame.ts";
 
 const { view, error, connected, host, nick, firing, send } = useGame();
 const localUnits = ref<Unit[]>([]);
+const fireWait = ref(false);
+let fireTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
   () => view.value?.yourFleet,
@@ -18,8 +21,43 @@ watch(
   },
 );
 
+watch(firing, (isFiring) => {
+  fireWait.value = false;
+  if (fireTimer) clearTimeout(fireTimer);
+  if (isFiring) {
+    fireTimer = setTimeout(() => {
+      fireWait.value = true;
+    }, 3000);
+  }
+});
+
+onUnmounted(() => {
+  if (fireTimer) clearTimeout(fireTimer);
+});
+
 const phase = computed(() => view.value?.phase ?? (connected.value ? "lobby" : "connecting"));
 const seatsTaken = computed(() => view.value?.seatsTaken ?? 0);
+
+const statusText = computed(() => {
+  if (fireWait.value) return "Ждём ответ стола…";
+  if (!connected.value) return "соединяемся…";
+  if (phase.value === "lobby" || phase.value === "connecting") {
+    return "Ждём второго за стол — пусть отсканирует QR";
+  }
+  if (phase.value === "placement") {
+    if (view.value?.yourReady) return "Ждём, пока соперник нажмёт Готов";
+    return "Расставь танки и нажми Готов";
+  }
+  if (phase.value === "battle" && view.value) {
+    if (view.value.turn === view.value.you) return "Твой ход — укажи клетку на чужом листе";
+    return "Сейчас ход соперника";
+  }
+  if (phase.value === "ended" && view.value && isDisconnectVictory(view.value)) {
+    return "Соперник вышел. Победа за тобой";
+  }
+  if (phase.value === "ended") return "Партия окончена";
+  return "";
+});
 
 function onUnits(units: Unit[]): void {
   localUnits.value = units;
@@ -47,11 +85,7 @@ function onFire(x: number, y: number): void {
       <p>{{ view?.nick ?? "тетрадный лист" }}</p>
     </header>
 
-    <HostPanel
-      v-if="phase === 'lobby' || phase === 'connecting' || (phase === 'placement' && seatsTaken < 2)"
-      :host="host"
-      :seats-taken="seatsTaken"
-    />
+    <HostPanel v-if="seatsTaken < 2" :host="host" :seats-taken="seatsTaken" />
 
     <div v-if="phase === 'lobby' || phase === 'connecting'" class="row">
       <input
@@ -62,8 +96,7 @@ function onFire(x: number, y: number): void {
       />
     </div>
 
-    <p class="status" v-if="!connected">соединяемся…</p>
-    <p class="status" v-else-if="phase === 'lobby'">ждём второго за стол</p>
+    <p class="status" data-testid="status">{{ statusText }}</p>
     <p class="error">{{ error }}</p>
 
     <PlacementBoard

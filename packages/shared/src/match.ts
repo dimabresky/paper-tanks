@@ -1,6 +1,18 @@
 import { otherSeat, sanitizeNick } from "./constants.ts";
-import { isUnitSunk, tanksLeft, unitAt, validateFleet } from "./fleet.ts";
-import { GameError, type Cell, type Fleet, type MatchState, type Seat, type SeatId, type Shot } from "./types.ts";
+import { mooreNeighbors, placeDecorations, shuffle } from "./decorations.ts";
+import { inBounds, isUnitSunk, tanksLeft, unitAt, validateFleet } from "./fleet.ts";
+import {
+  GameError,
+  type Cell,
+  type Decoration,
+  type Fleet,
+  type MatchState,
+  type Seat,
+  type SeatId,
+  type Shot,
+  type ShotCause,
+  type ShotResult,
+} from "./types.ts";
 
 export function createMatch(): MatchState {
   return {
@@ -26,6 +38,7 @@ export function occupySeat(
     token,
     ready: false,
     fleet: null,
+    decorations: [],
     connected: true,
     lastSeen: now,
   };
@@ -62,7 +75,12 @@ export function placeFleet(state: MatchState, seat: SeatId, fleet: Fleet): void 
   player.ready = false;
 }
 
-export function setReady(state: MatchState, seat: SeatId, now = Date.now()): void {
+export function setReady(
+  state: MatchState,
+  seat: SeatId,
+  now = Date.now(),
+  rng: () => number = Math.random,
+): void {
   const player = requireSeat(state, seat);
   if (state.phase !== "placement") {
     throw new GameError("BAD_PHASE", "Нельзя подтвердить готовность сейчас");
@@ -74,8 +92,10 @@ export function setReady(state: MatchState, seat: SeatId, now = Date.now()): voi
   const a = state.seats.a;
   const b = state.seats.b;
   if (a?.ready && b?.ready && a.fleet && b.fleet) {
+    a.decorations = placeDecorations(a.fleet, rng);
+    b.decorations = placeDecorations(b.fleet, rng);
     state.phase = "battle";
-    state.turn = Math.random() < 0.5 ? "a" : "b";
+    state.turn = rng() < 0.5 ? "a" : "b";
     state.startedAt = now;
     state.shots = [];
     state.winner = null;
@@ -89,6 +109,7 @@ export function applyFire(
   seat: SeatId,
   cell: Cell,
   now = Date.now(),
+  rng: () => number = Math.random,
 ): Shot {
   if (state.phase !== "battle") {
     throw new GameError("BAD_PHASE", "Сейчас не бой");
@@ -99,41 +120,84 @@ export function applyFire(
   const attacker = requireSeat(state, seat);
   const defender = requireSeat(state, otherSeat(seat));
   if (!defender.fleet) throw new GameError("BAD_PHASE", "Нет флота соперника");
-  if (cell.x < 0 || cell.x > 11 || cell.y < 0 || cell.y > 15) {
+  if (!inBounds(cell)) {
     throw new GameError("BAD_MESSAGE", "Клетка вне листа");
   }
-  const already = state.shots.some(
-    (s) => s.by === seat && s.cell.x === cell.x && s.cell.y === cell.y,
-  );
-  if (already) throw new GameError("CELL_TAKEN", "Уже стреляли сюда");
+  if (openedBy(state, seat, cell)) {
+    throw new GameError("CELL_TAKEN", "Уже стреляли сюда");
+  }
 
-  const hitsSoFar = shotsOn(state, defender.id);
-  const unit = unitAt(defender.fleet, cell);
-  let shot: Shot;
-  if (!unit) {
-    shot = { by: seat, cell, result: "miss", at: now };
-    state.shots.push(shot);
-    state.turn = defender.id;
-  } else {
-    const hitsAfter = [...hitsSoFar, cell];
+  const resolved: Shot[] = [];
+  const primary = resolveCell(state, attacker.id, defender, cell, "fire", now);
+  state.shots.push(primary);
+  resolved.push(primary);
+
+  if (primary.result === "crate") {
+    const opened = (c: Cell) => openedBy(state, seat, c);
+    const candidates = mooreNeighbors(cell).filter((c) => !opened(c));
+    const want = Math.min(candidates.length, 2 + Math.floor(rng() * 3));
+    for (const blastCell of shuffle(candidates, rng).slice(0, want)) {
+      if (openedBy(state, seat, blastCell)) continue;
+      const blast = resolveCell(state, attacker.id, defender, blastCell, "blast", now);
+      state.shots.push(blast);
+      resolved.push(blast);
+    }
+  }
+
+  const hitsAfter = shotsOn(state, defender.id);
+  if (tanksLeft(defender.fleet, hitsAfter) === 0) {
+    state.phase = "ended";
+    state.winner = attacker.id;
+    state.endedReason = "fleet";
+    state.endedAt = now;
+    state.turn = null;
+    return primary;
+  }
+
+  const keepTurn = resolved.some((s) => s.result === "hit" || s.result === "sunk");
+  state.turn = keepTurn ? attacker.id : defender.id;
+  return primary;
+}
+
+function resolveCell(
+  state: MatchState,
+  attacker: SeatId,
+  defender: Seat,
+  cell: Cell,
+  cause: ShotCause,
+  now: number,
+): Shot {
+  const unit = defender.fleet ? unitAt(defender.fleet, cell) : undefined;
+  if (unit) {
+    const hitsAfter = [...shotsOn(state, defender.id), cell];
     const sunk = isUnitSunk(unit, hitsAfter);
-    shot = {
-      by: seat,
+    return {
+      by: attacker,
       cell,
       result: sunk ? "sunk" : "hit",
+      cause,
       sunkUnitId: sunk ? unit.id : undefined,
       at: now,
     };
-    state.shots.push(shot);
-    if (tanksLeft(defender.fleet, hitsAfter) === 0) {
-      state.phase = "ended";
-      state.winner = attacker.id;
-      state.endedReason = "fleet";
-      state.endedAt = now;
-      state.turn = null;
-    }
   }
-  return shot;
+
+  const deco = decorationAt(defender, cell);
+  if (deco?.kind === "tree") {
+    deco.burned = true;
+    return { by: attacker, cell, result: "tree", cause, at: now };
+  }
+  if (deco?.kind === "crate") {
+    return { by: attacker, cell, result: "crate", cause, at: now };
+  }
+  return { by: attacker, cell, result: "miss" satisfies ShotResult, cause, at: now };
+}
+
+function decorationAt(seat: Seat, cell: Cell): Decoration | undefined {
+  return seat.decorations.find((d) => d.cell.x === cell.x && d.cell.y === cell.y);
+}
+
+function openedBy(state: MatchState, attacker: SeatId, cell: Cell): boolean {
+  return state.shots.some((s) => s.by === attacker && s.cell.x === cell.x && s.cell.y === cell.y);
 }
 
 export function voteRematch(state: MatchState, seat: SeatId): void {
@@ -170,6 +234,7 @@ function resetForRematch(state: MatchState): void {
     if (!s) continue;
     s.fleet = null;
     s.ready = false;
+    s.decorations = [];
   }
 }
 
