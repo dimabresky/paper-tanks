@@ -7,7 +7,7 @@ export default defineConfig({
   timeout: 180_000,
   fullyParallel: false,
   webServer: {
-    command: `PORT=${e2ePort} npx pnpm@10 --filter @paper-tanks/server dev`,
+    command: `PORT=${e2ePort} pnpm --filter @paper-tanks/server start`,
     url: `http://127.0.0.1:${e2ePort}/api/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
