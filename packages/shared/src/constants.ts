@@ -1,8 +1,24 @@
-/** 12×16 notebook page. Columns А–Л including Й, skipping Ё. */
-export const COLS = 12;
-export const ROWS = 16;
-export const COL_LETTERS = "АБВГДЕЖЗИЙКЛ";
-export const FLEET_LENGTHS = [4, 3, 3, 2, 2, 2, 1, 1] as const;
+/** 16×22 notebook page. Columns А–П including Й, skipping Ё. */
+export const COLS = 16;
+export const ROWS = 22;
+export const COL_LETTERS = "АБВГДЕЖЗИЙКЛМНОП";
+
+export const FLEET_SHAPES = [
+  { length: 4, width: 2 },
+  { length: 3, width: 2 },
+  { length: 3, width: 2 },
+  { length: 2, width: 1 },
+  { length: 2, width: 1 },
+  { length: 2, width: 1 },
+  { length: 1, width: 1 },
+  { length: 1, width: 1 },
+] as const;
+
+export type FleetShape = (typeof FLEET_SHAPES)[number];
+
+/** Length column of FLEET_SHAPES (one 4, two 3s, three 2s, two 1s). */
+export const FLEET_LENGTHS = FLEET_SHAPES.map((s) => s.length);
+
 function envPort(): string | undefined {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
   return proc?.env?.PORT;
@@ -36,4 +52,12 @@ export function sanitizeNick(raw: string | undefined, fallback: string): string 
     .trim()
     .slice(0, NICK_MAX);
   return trimmed.length > 0 ? trimmed : fallback;
+}
+
+export function widthForLength(length: 1 | 2 | 3 | 4): 1 | 2 {
+  return length >= 3 ? 2 : 1;
+}
+
+export function shapeTag(length: number, width: number): "2x4" | "2x3" | "1x2" | "1x1" {
+  return `${width}x${length}` as "2x4" | "2x3" | "1x2" | "1x1";
 }

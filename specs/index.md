@@ -11,7 +11,8 @@
 
 | Task ID | Feature | Status | Created |
 |---------|---------|--------|---------|
-| [paper-tanks](active/paper-tanks/feature-brief.md) | Paper Tanks (танчики 1vs1) | Full SDD 6.0 — Ready for Implementation | 2026-09-12 |
+| [paper-tanks](active/paper-tanks/feature-brief.md) | Paper Tanks (танчики 1vs1) | v1.5 shipped; geometry increment in 001 | 2026-09-12 |
+| [001-dense-field-placement](001-dense-field-placement/spec.md) | Крупнее лист, фигурки, сильнее гарь | Spec+plan+tasks — 16×22, drag, stamp | 2026-09-16 |
 
 ### Completed Features
 

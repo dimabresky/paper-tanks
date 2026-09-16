@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { cellKey } from "./constants.ts";
 import { placeDecorations } from "./decorations.ts";
-import { cellsForAnchor, validateFleet } from "./fleet.ts";
+import { cellsForRect, validateFleet } from "./fleet.ts";
 import type { Fleet } from "./types.ts";
 
 const stacked: Fleet = {
   units: [
-    { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-    { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-    { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-    { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-    { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-    { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-    { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-    { id: "u7", length: 1, cells: [{ x: 11, y: 15 }] },
+    { id: "u0", length: 4, width: 2, cells: cellsForRect({ x: 0, y: 0 }, 4, 2, true) },
+    { id: "u1", length: 3, width: 2, cells: cellsForRect({ x: 0, y: 3 }, 3, 2, true) },
+    { id: "u2", length: 3, width: 2, cells: cellsForRect({ x: 0, y: 6 }, 3, 2, true) },
+    { id: "u3", length: 2, width: 1, cells: cellsForRect({ x: 0, y: 9 }, 2, 1, true) },
+    { id: "u4", length: 2, width: 1, cells: cellsForRect({ x: 0, y: 11 }, 2, 1, true) },
+    { id: "u5", length: 2, width: 1, cells: cellsForRect({ x: 0, y: 13 }, 2, 1, true) },
+    { id: "u6", length: 1, width: 1, cells: cellsForRect({ x: 0, y: 15 }, 1, 1, true) },
+    { id: "u7", length: 1, width: 1, cells: [{ x: 15, y: 21 }] },
   ],
 };
 

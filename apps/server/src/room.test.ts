@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { getPlayerView, randomValidFleet } from "@paper-tanks/shared";
+import { COLS, ROWS, getPlayerView, randomValidFleet } from "@paper-tanks/shared";
 import { lanIPv4s } from "./lan.ts";
 import { Room, type WireClient } from "./room.ts";
 
@@ -139,12 +139,12 @@ describe("Room", () => {
     room.handle(b, { type: "place", payload: { units: randomValidFleet().units } });
     room.handle(a, { type: "ready", payload: {} });
     room.handle(b, { type: "ready", payload: {} });
-    const all = Array.from({ length: 12 * 16 }, (_, i) => ({
-      x: i % 12,
-      y: Math.floor(i / 12),
+    const all = Array.from({ length: COLS * ROWS }, (_, i) => ({
+      x: i % COLS,
+      y: Math.floor(i / COLS),
     }));
     const fired = { a: new Set<string>(), b: new Set<string>() };
-    for (let n = 0; n < 400; n++) {
+    for (let n = 0; n < COLS * ROWS * 2 + 200; n++) {
       if (room.state.phase === "ended") break;
       const turn = room.state.turn;
       if (!turn) break;

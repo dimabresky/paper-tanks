@@ -21,6 +21,7 @@ export {
   COL_LETTERS,
   DISCONNECT_MS,
   FLEET_LENGTHS,
+  FLEET_SHAPES,
   NICK_MAX,
   PING_MS,
   PORT,
@@ -30,16 +31,23 @@ export {
   colLetter,
   otherSeat,
   sanitizeNick,
+  shapeTag,
+  widthForLength,
 } from "./constants.ts";
+export type { FleetShape } from "./constants.ts";
 export {
   canAddUnit,
-  cellsForAnchor,
+  cellsForRect,
+  flipUnit,
   inBounds,
-  isOrthogonalContiguous,
+  isOrthogonalRectangle,
+  isUnitHorizontal,
   isUnitSunk,
   randomValidFleet,
+  rotateUnit,
   tanksLeft,
   unitAt,
+  unitOrigin,
   unitsTouchOrOverlap,
   validateFleet,
 } from "./fleet.ts";

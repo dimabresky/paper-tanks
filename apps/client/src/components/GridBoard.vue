@@ -10,7 +10,7 @@ const emit = defineEmits<{
   cell: [x: number, y: number];
 }>();
 
-const DEFAULT_CELL = 36;
+const DEFAULT_CELL = 22;
 const MAX_CELL = 72;
 const cellSize = ref(DEFAULT_CELL);
 const scroller = ref<HTMLElement | null>(null);
@@ -24,7 +24,7 @@ function fitSize(): number {
 
 function clamp(size: number): number {
   const fit = fitSize();
-  const min = Math.min(DEFAULT_CELL, Math.max(24, fit || DEFAULT_CELL));
+  const min = Math.max(10, fit || DEFAULT_CELL);
   return Math.min(MAX_CELL, Math.max(min, size));
 }
 
@@ -72,7 +72,12 @@ function pinchDistance(e: TouchEvent): number {
       @touchstart="onTouchStart"
       @touchmove="onTouchMove"
     >
-      <div class="board" role="grid" aria-label="Тетрадное поле">
+      <div
+        class="board"
+        role="grid"
+        aria-label="Тетрадное поле"
+        :style="{ gridTemplateColumns: `1.4rem repeat(${COLS}, var(--cell-size))` }"
+      >
         <span></span>
         <span v-for="letter in cols" :key="letter" class="hlabel">{{ letter }}</span>
         <template v-for="y in ROWS" :key="y">

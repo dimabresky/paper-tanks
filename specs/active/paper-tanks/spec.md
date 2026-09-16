@@ -4,13 +4,15 @@
 
 **Created**: 2026-09-12
 
-**Updated**: 2026-09-13
+**Updated**: 2026-09-16
 
 **Status**: Ready for Planning
 
 **Input**: User description: "Заменить Development Workflow на полный SDD-цикл speckit (specify → gate spec → clarify при неясностях → plan → gate plan → tasks → analyze) затем ветка от dev, implement, проверки, PR, /review-bugbot, решение по находкам, babysit, merge только по явному подтверждению"
 
-**Version**: 1.5
+**Version**: 1.6
+
+> **Инкремент листа и расстановки:** размер поля, флот и ручная постановка для следующей поставки заданы в [001-dense-field-placement/spec.md](../../001-dense-field-placement/spec.md): лист **16×22**, флот **28 клеток** (2×4 / 2×3 / 1×2 / 1×1), перетаскивание фигурок. Цифры **12×16** и линия 1×N ниже — канон **v1.5**, как играла уже слитая партия, не цель этого инкремента.
 
 ---
 
@@ -300,3 +302,4 @@
 | 1.3 | 2026-09-13 | Clarify: стол только на ПК в Wi‑Fi, без P2P; компьютер — единственный судья |
 | 1.4 | 2026-09-13 | Clarify: Development Workflow убран из spec; канон процесса — constitution |
 | 1.5 | 2026-09-13 | Analyze: US3 = мимо/ранен/убит; ёлка/ящик остаются в US6 / FR-012 |
+| 1.6 | 2026-09-16 | Analyze F2: ссылка на инкремент 16×22 / 28 клеток (`001-dense-field-placement`) |
