@@ -159,6 +159,10 @@ button.primary {
   min-width: var(--cell-size);
 }
 
+.cell:has([data-testid="placed-tank"]) {
+  z-index: 2;
+}
+
 .cell.preview {
   background: rgba(28, 76, 156, 0.22);
 }

@@ -166,7 +166,7 @@ function onPointerUp(event: PointerEvent): void {
     return;
   }
 
-  if (tray && d.source === "board" && d.unitId) {
+  if (d.moved && tray && d.source === "board" && d.unitId) {
     emit(
       "update:units",
       d.lastValid.filter((u) => u.id !== d.unitId),

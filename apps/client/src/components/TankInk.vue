@@ -19,7 +19,7 @@ const viewBox = computed(() =>
       : `0 0 ${W.value} ${L.value}`,
 );
 const boardTransform = computed(() =>
-  props.pose === "tray" || props.horizontal ? "" : `translate(0 ${L.value}) rotate(90)`,
+  props.pose === "tray" || props.horizontal ? "" : `translate(${W.value} 0) rotate(90)`,
 );
 </script>
 
