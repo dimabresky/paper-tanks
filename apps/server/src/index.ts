@@ -12,14 +12,7 @@ const isProd = process.env.NODE_ENV === "production";
 const room = new Room();
 
 async function main(): Promise<void> {
-  const vite = isProd
-    ? null
-    : await (await import("vite")).createServer({
-        configFile: resolve(__dirname, "../../client/vite.config.ts"),
-        root: resolve(__dirname, "../../client"),
-        server: { middlewareMode: true, allowedHosts: true },
-        appType: "spa",
-      });
+  let vite: Awaited<ReturnType<typeof import("vite")["createServer"]>> | null = null;
 
   const server = createServer(async (req, res) => {
     try {
@@ -33,7 +26,25 @@ async function main(): Promise<void> {
     }
   });
 
-  const wss = new WebSocketServer({ server, path: "/ws" });
+  if (!isProd) {
+    vite = await (
+      await import("vite")
+    ).createServer({
+      configFile: resolve(__dirname, "../../client/vite.config.ts"),
+      root: resolve(__dirname, "../../client"),
+      server: { middlewareMode: true, hmr: { server }, allowedHosts: true },
+      appType: "spa",
+    });
+  }
+
+  const wss = new WebSocketServer({ noServer: true });
+  server.on("upgrade", (req, socket, head) => {
+    const pathname = (req.url ?? "").split("?")[0];
+    if (pathname !== "/ws") return;
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit("connection", ws, req);
+    });
+  });
   wss.on("connection", (ws) => attachSocket(ws));
 
   server.listen(PORT, "0.0.0.0", () => {
