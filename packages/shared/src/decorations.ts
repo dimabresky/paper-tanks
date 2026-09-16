@@ -2,8 +2,8 @@ import { COLS, ROWS, cellKey } from "./constants.ts";
 import { inBounds } from "./fleet.ts";
 import type { Cell, Decoration, DecorationKind, Fleet } from "./types.ts";
 
-const TREE_COUNT = 5;
-const CRATE_COUNT = 2;
+const TREE_COUNT = 10;
+const CRATE_COUNT = 4;
 const DECORATION_COUNT = TREE_COUNT + CRATE_COUNT;
 
 export function mooreNeighbors(cell: Cell): Cell[] {

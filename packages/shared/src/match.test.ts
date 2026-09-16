@@ -231,4 +231,27 @@ describe("applyFire", () => {
     expect(state.seats.a?.decorations).toEqual([]);
     expect(state.seats.b?.decorations).toEqual([]);
   });
+
+  it("places 10 trees and 4 crates per seat after rematch and both ready again", () => {
+    const state = readyMatch();
+    state.phase = "ended";
+    voteRematch(state, "a");
+    voteRematch(state, "b");
+    expect(state.seats.a?.decorations).toEqual([]);
+    expect(state.seats.b?.decorations).toEqual([]);
+
+    placeFleet(state, "a", randomValidFleet());
+    placeFleet(state, "b", randomValidFleet());
+    setReady(state, "a");
+    setReady(state, "b");
+
+    for (const seat of ["a", "b"] as const) {
+      const deco = state.seats[seat]!.decorations;
+      expect(deco).toHaveLength(14);
+      expect(deco.filter((d) => d.kind === "tree")).toHaveLength(10);
+      expect(deco.filter((d) => d.kind === "crate")).toHaveLength(4);
+      expect(deco.every((d) => d.burned === false)).toBe(true);
+    }
+  });
 });
+

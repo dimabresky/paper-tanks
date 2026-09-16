@@ -28,7 +28,7 @@ Fleet: lengths `[4,3,3,2,2,2,1,1]` (18 cells). Drawing occupies exactly those ce
 | cell | Cell | Empty of units and other decorations |
 | burned | boolean | Trees only; true after that cell is opened as tree |
 
-Per seat at battle start: 5 trees, 2 crates. May be Moore-adjacent to tanks. Must not overlap units or decorations.
+Per seat at battle start: 10 trees, 4 crates. May be Moore-adjacent to tanks. Must not overlap units or decorations.
 
 ## Shot
 

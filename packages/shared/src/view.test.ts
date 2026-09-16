@@ -127,4 +127,38 @@ describe("getPlayerView", () => {
       after.shotsYouFired.some((s) => s.cell.x === 9 && s.cell.y === 9 && s.result === "tree"),
     ).toBe(true);
   });
+
+  it("lists 10 own trees and 4 own crates after battle start without leaking B’s unrevealed décor cells", () => {
+    expect(validateFleet(stacked.units).ok).toBe(true);
+    expect(validateFleet(stackedA.units).ok).toBe(true);
+    const state = createMatch();
+    occupySeat(state, "a", "Аня", "ta");
+    occupySeat(state, "b", "Боря", "tb");
+    placeFleet(state, "a", stackedA);
+    placeFleet(state, "b", stacked);
+    let i = 0;
+    const rng = () => {
+      i += 1;
+      return (i % 97) / 97;
+    };
+    setReady(state, "a", Date.now(), rng);
+    setReady(state, "b", Date.now(), rng);
+
+    const viewA = getPlayerView(state, "a");
+    expect(viewA.yourDecorations.filter((d) => d.kind === "tree")).toHaveLength(10);
+    expect(viewA.yourDecorations.filter((d) => d.kind === "crate")).toHaveLength(4);
+    expect(viewA.yourDecorations).toHaveLength(14);
+
+    const json = JSON.stringify(viewA);
+    const ownKeys = new Set([
+      ...viewA.yourDecorations.map((d) => `${d.cell.x},${d.cell.y}`),
+      ...(viewA.yourFleet?.units.flatMap((u) => u.cells.map((c) => `${c.x},${c.y}`)) ?? []),
+    ]);
+    for (const deco of state.seats.b!.decorations) {
+      const key = `${deco.cell.x},${deco.cell.y}`;
+      if (ownKeys.has(key)) continue;
+      expect(json).not.toMatch(new RegExp(`"x":${deco.cell.x},"y":${deco.cell.y}`));
+    }
+  });
 });
+

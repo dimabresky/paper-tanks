@@ -32,7 +32,7 @@ This increment changes what players see and what a shot can resolve to: squared 
 
 **Constraints**: No accounts, no internet lobby, no WebRTC; bind `0.0.0.0:8787`; fog of war in `getPlayerView`; Russian UI; cell grid only on the board
 
-**Scale/Scope**: 1 room, 2 seats, 12×16 sheet, 8 units + 5 trees + 2 crates per sheet
+**Scale/Scope**: 1 room, 2 seats, 12×16 sheet, 8 units + 10 trees + 4 crates per sheet
 
 ## Constitution Check
 
