@@ -12,6 +12,8 @@ export interface Cell {
 export interface Unit {
   id: string;
   length: 1 | 2 | 3 | 4;
+  /** Short axis; 2 iff length is 3 or 4, else 1. `cells.length === length * width`. */
+  width: 1 | 2;
   cells: Cell[];
 }
 

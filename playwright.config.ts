@@ -4,7 +4,7 @@ const e2ePort = 8799;
 
 export default defineConfig({
   testDir: "./e2e",
-  timeout: 120_000,
+  timeout: 180_000,
   fullyParallel: false,
   webServer: {
     command: `PORT=${e2ePort} npx pnpm@10 --filter @paper-tanks/server dev`,

@@ -10,14 +10,21 @@ import { useGame } from "./composables/useGame.ts";
 
 const { view, error, connected, host, nick, firing, send } = useGame();
 const localUnits = ref<Unit[]>([]);
+/** Local placement edits (tray return, partial drag) must not be overwritten by a stale full `yourFleet`. */
+const placementEdited = ref(false);
 const fireWait = ref(false);
 let fireTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
   () => view.value?.yourFleet,
   (fleet) => {
+    if (view.value?.phase === "placement" && !fleet) {
+      localUnits.value = [];
+      placementEdited.value = false;
+      return;
+    }
+    if (placementEdited.value) return;
     if (fleet?.units.length) localUnits.value = fleet.units;
-    if (view.value?.phase === "placement" && !fleet) localUnits.value = [];
   },
 );
 
@@ -46,7 +53,8 @@ const statusText = computed(() => {
   }
   if (phase.value === "placement") {
     if (view.value?.yourReady) return "Ждём, пока соперник нажмёт Готов";
-    return "Расставь танки и нажми Готов";
+    if (localUnits.value.length < 8) return "Перетащи танки на лист";
+    return "Тапни танк и нажми Повернуть";
   }
   if (phase.value === "battle" && view.value) {
     if (view.value.turn === view.value.you) return "Твой ход — укажи клетку на чужом листе";
@@ -60,6 +68,7 @@ const statusText = computed(() => {
 });
 
 function onUnits(units: Unit[]): void {
+  placementEdited.value = true;
   localUnits.value = units;
   const v = validateFleet(units);
   if (v.ok) send({ type: "place", payload: { units } });

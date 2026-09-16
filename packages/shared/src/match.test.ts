@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cellsForAnchor, randomValidFleet, validateFleet } from "./fleet.ts";
+import { cellsForRect, randomValidFleet, validateFleet } from "./fleet.ts";
 import {
   applyFire,
   createMatch,
@@ -8,7 +8,34 @@ import {
   setReady,
   voteRematch,
 } from "./match.ts";
-import type { Fleet, SeatId } from "./types.ts";
+import type { Cell, Fleet, SeatId, Unit } from "./types.ts";
+
+function rect(
+  id: string,
+  length: 1 | 2 | 3 | 4,
+  width: 1 | 2,
+  x: number,
+  y: number,
+  last?: Cell,
+): Unit {
+  if (last) return { id, length, width, cells: [last] };
+  return { id, length, width, cells: cellsForRect({ x, y }, length, width, true) };
+}
+
+function stackedFleet(prefix: string, last?: Cell): Fleet {
+  return {
+    units: [
+      rect(`${prefix}0`, 4, 2, 0, 0),
+      rect(`${prefix}1`, 3, 2, 0, 3),
+      rect(`${prefix}2`, 3, 2, 0, 6),
+      rect(`${prefix}3`, 2, 1, 0, 9),
+      rect(`${prefix}4`, 2, 1, 0, 11),
+      rect(`${prefix}5`, 2, 1, 0, 13),
+      rect(`${prefix}6`, 1, 1, 0, 15),
+      rect(`${prefix}7`, 1, 1, last?.x ?? 0, last?.y ?? 17, last),
+    ],
+  };
+}
 
 function readyMatch(): ReturnType<typeof createMatch> {
   const state = createMatch();
@@ -28,30 +55,8 @@ describe("applyFire", () => {
     const state = createMatch();
     occupySeat(state, "a", "Аня", "ta");
     occupySeat(state, "b", "Боря", "tb");
-    const fa: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: cellsForAnchor(0, 14, 1, true) },
-      ],
-    };
-    const fb: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: [{ x: 11, y: 15 }] },
-      ],
-    };
+    const fa = stackedFleet("a", { x: 0, y: 17 });
+    const fb = stackedFleet("b", { x: 15, y: 21 });
     expect(validateFleet(fa.units).ok).toBe(true);
     expect(validateFleet(fb.units).ok).toBe(true);
     placeFleet(state, "a", fa);
@@ -62,7 +67,7 @@ describe("applyFire", () => {
     state.seats.a!.decorations = [];
     state.seats.b!.decorations = [];
 
-    const miss = applyFire(state, "a", { x: 5, y: 15 });
+    const miss = applyFire(state, "a", { x: 5, y: 20 });
     expect(miss.result).toBe("miss");
     expect(miss.cause).toBe("fire");
     expect(state.turn).toBe("b");
@@ -74,22 +79,39 @@ describe("applyFire", () => {
     expect(() => applyFire(state, "b", { x: 0, y: 0 })).toThrow(/уже стреляли/i);
   });
 
+  it("fires one cell of a 2×4 as hit, then sunk after the other seven", () => {
+    const state = createMatch();
+    occupySeat(state, "a", "Аня", "ta");
+    occupySeat(state, "b", "Боря", "tb");
+    const fleet = stackedFleet("u");
+    placeFleet(state, "a", fleet);
+    placeFleet(state, "b", fleet);
+    setReady(state, "a");
+    setReady(state, "b");
+    state.turn = "a";
+    state.seats.a!.decorations = [];
+    state.seats.b!.decorations = [];
+
+    const cells = fleet.units[0]!.cells;
+    const first = applyFire(state, "a", cells[0]!);
+    expect(first.result).toBe("hit");
+    expect(state.turn).toBe("a");
+    for (let i = 1; i < cells.length; i++) {
+      const shot = applyFire(state, "a", cells[i]!);
+      if (i < cells.length - 1) {
+        expect(shot.result).toBe("hit");
+        expect(state.turn).toBe("a");
+      } else {
+        expect(shot.result).toBe("sunk");
+      }
+    }
+  });
+
   it("marks sunk when the last cell of a unit is hit and wins when fleet is gone", () => {
     const state = createMatch();
     occupySeat(state, "a", "Аня", "ta");
     occupySeat(state, "b", "Боря", "tb");
-    const tinyA: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: cellsForAnchor(0, 14, 1, true) },
-      ],
-    };
+    const tinyA = stackedFleet("u");
     placeFleet(state, "a", tinyA);
     placeFleet(state, "b", tinyA);
     setReady(state, "a");
@@ -121,18 +143,7 @@ describe("applyFire", () => {
     const state = createMatch();
     occupySeat(state, "a", "Аня", "ta");
     occupySeat(state, "b", "Боря", "tb");
-    const fleet: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: [{ x: 11, y: 15 }] },
-      ],
-    };
+    const fleet = stackedFleet("u", { x: 15, y: 21 });
     placeFleet(state, "a", fleet);
     placeFleet(state, "b", fleet);
     setReady(state, "a");
@@ -154,18 +165,7 @@ describe("applyFire", () => {
     const state = createMatch();
     occupySeat(state, "a", "Аня", "ta");
     occupySeat(state, "b", "Боря", "tb");
-    const fleet: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: [{ x: 11, y: 15 }] },
-      ],
-    };
+    const fleet = stackedFleet("u", { x: 15, y: 21 });
     placeFleet(state, "a", fleet);
     placeFleet(state, "b", fleet);
     setReady(state, "a");
@@ -200,30 +200,8 @@ describe("applyFire", () => {
     const state = createMatch();
     occupySeat(state, "a", "Аня", "ta");
     occupySeat(state, "b", "Боря", "tb");
-    const fleetA: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: [{ x: 11, y: 15 }] },
-      ],
-    };
-    const fleetB: Fleet = {
-      units: [
-        { id: "u0", length: 4, cells: cellsForAnchor(0, 0, 4, true) },
-        { id: "u1", length: 3, cells: cellsForAnchor(0, 2, 3, true) },
-        { id: "u2", length: 3, cells: cellsForAnchor(0, 4, 3, true) },
-        { id: "u3", length: 2, cells: cellsForAnchor(0, 6, 2, true) },
-        { id: "u4", length: 2, cells: cellsForAnchor(0, 8, 2, true) },
-        { id: "u5", length: 2, cells: cellsForAnchor(0, 10, 2, true) },
-        { id: "u6", length: 1, cells: cellsForAnchor(0, 12, 1, true) },
-        { id: "u7", length: 1, cells: [{ x: 5, y: 14 }] },
-      ],
-    };
+    const fleetA = stackedFleet("a", { x: 15, y: 21 });
+    const fleetB = stackedFleet("b", { x: 5, y: 14 });
     placeFleet(state, "a", fleetA);
     placeFleet(state, "b", fleetB);
     setReady(state, "a");
