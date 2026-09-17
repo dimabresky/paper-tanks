@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cellKey } from "./constants.ts";
+import { COLS, ROWS, cellKey } from "./constants.ts";
 import { placeDecorations } from "./decorations.ts";
 import { cellsForRect, validateFleet } from "./fleet.ts";
 import type { Fleet } from "./types.ts";
@@ -17,30 +17,40 @@ const stacked: Fleet = {
   ],
 };
 
+function cycleRng(start: number): () => number {
+  let i = start;
+  return () => {
+    i += 1;
+    return (i % 97) / 97;
+  };
+}
+
+function assertTenTreesFourCrates(fleet: Fleet, decorations: ReturnType<typeof placeDecorations>): void {
+  const unitKeys = new Set(fleet.units.flatMap((u) => u.cells.map((c) => cellKey(c.x, c.y))));
+  expect(decorations.filter((d) => d.kind === "tree")).toHaveLength(10);
+  expect(decorations.filter((d) => d.kind === "crate")).toHaveLength(4);
+  expect(decorations).toHaveLength(14);
+  expect(decorations.every((d) => d.burned === false)).toBe(true);
+
+  const seen = new Set<string>();
+  for (const deco of decorations) {
+    expect(deco.cell.x).toBeGreaterThanOrEqual(0);
+    expect(deco.cell.x).toBeLessThan(COLS);
+    expect(deco.cell.y).toBeGreaterThanOrEqual(0);
+    expect(deco.cell.y).toBeLessThan(ROWS);
+    const key = cellKey(deco.cell.x, deco.cell.y);
+    expect(unitKeys.has(key)).toBe(false);
+    expect(seen.has(key)).toBe(false);
+    seen.add(key);
+  }
+}
+
 describe("placeDecorations", () => {
-  it("places 5 trees and 2 crates off unit cells without overlapping", () => {
+  it("places 10 trees and 4 crates off unit cells without overlapping (10 seeds)", () => {
     expect(validateFleet(stacked.units).ok).toBe(true);
-    const unitKeys = new Set(stacked.units.flatMap((u) => u.cells.map((c) => cellKey(c.x, c.y))));
-    const rng = (() => {
-      let i = 0;
-      return () => {
-        i += 1;
-        return (i % 97) / 97;
-      };
-    })();
-
-    const decorations = placeDecorations(stacked, rng);
-    expect(decorations.filter((d) => d.kind === "tree")).toHaveLength(5);
-    expect(decorations.filter((d) => d.kind === "crate")).toHaveLength(2);
-    expect(decorations).toHaveLength(7);
-    expect(decorations.every((d) => d.burned === false)).toBe(true);
-
-    const seen = new Set<string>();
-    for (const deco of decorations) {
-      const key = cellKey(deco.cell.x, deco.cell.y);
-      expect(unitKeys.has(key)).toBe(false);
-      expect(seen.has(key)).toBe(false);
-      seen.add(key);
+    for (let seed = 0; seed < 10; seed++) {
+      const decorations = placeDecorations(stacked, cycleRng(seed * 13));
+      assertTenTreesFourCrates(stacked, decorations);
     }
   });
 

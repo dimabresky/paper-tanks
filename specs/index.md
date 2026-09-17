@@ -11,8 +11,9 @@
 
 | Task ID | Feature | Status | Created |
 |---------|---------|--------|---------|
-| [paper-tanks](active/paper-tanks/feature-brief.md) | Paper Tanks (танчики 1vs1) | v1.5 shipped; geometry increment in 001 | 2026-09-12 |
-| [001-dense-field-placement](001-dense-field-placement/spec.md) | Крупнее лист, фигурки, сильнее гарь | Spec+plan+tasks — 16×22, drag, stamp | 2026-09-16 |
+| [paper-tanks](active/paper-tanks/feature-brief.md) | Paper Tanks (танчики 1vs1) | v1.6 shipped; décor count in 002 | 2026-09-12 |
+| [001-dense-field-placement](001-dense-field-placement/spec.md) | Крупнее лист, фигурки, сильнее гарь | Shipped — 16×22, drag, stamp | 2026-09-16 |
+| [002-more-trees-crates](002-more-trees-crates/spec.md) | Больше ёлок и ящиков | Implementing — 10 ёлок, 4 ящика на лист | 2026-09-16 |
 
 ### Completed Features
 

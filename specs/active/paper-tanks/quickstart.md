@@ -39,7 +39,7 @@ pnpm test:e2e      # two Playwright contexts, full match
 
 After this plan is implemented, shared tests MUST also cover:
 
-- `placeDecorations`: 5 trees + 2 crates, no overlap with fleet
+- `placeDecorations`: 10 trees + 4 crates, no overlap with fleet
 - `applyFire` tree → result `tree`, turn passes
 - `applyFire` crate → 2–4 blast cells; nested crate does not re-blast; turn kept iff a tank cell was damaged
 - `getPlayerView`: opponent decoration cells absent until fired

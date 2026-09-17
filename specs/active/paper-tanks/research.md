@@ -12,7 +12,7 @@
 
 ## Decision: Decorations generated on battle start, authoritative
 
-- **Decision**: When both seats `ready` with valid fleets, `setReady` places 5 trees + 2 crates per seat on empty cells (may touch tanks, must not overlap tanks or other decorations). Stored on `Seat.decorations`. Regenerated on rematch.
+- **Decision**: When both seats `ready` with valid fleets, `setReady` places 10 trees + 4 crates per seat on empty cells (may touch tanks, must not overlap tanks or other decorations). Stored on `Seat.decorations`. Regenerated on rematch.
 - **Rationale**: Spec FR-013 / US6 — after accepted fleets, visible on own sheet in battle, hidden on the enemy sheet until opened. Generating at battle start keeps placement UI uncluttered.
 - **Alternatives considered**: Generate during placement (clutters tank taps); generate on first `place` (unstable as the player edits the fleet).
 
